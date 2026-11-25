@@ -1,0 +1,20 @@
+/joint_impedance_controller:
+  ros__parameters:
+    arm_id: fr3
+    k_alpha: 0.99
+    k_gains:
+      - 240.0
+      - 240.0
+      - 240.0
+      - 240.0
+      - 100.0
+      - 60.0
+      - 20.0
+    d_gains:
+      - 20.0
+      - 20.0
+      - 20.0
+      - 10.0
+      - 10.0
+      - 10.0
+      - 0.5
