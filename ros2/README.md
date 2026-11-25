@@ -46,11 +46,11 @@ If you add new dependencies to your packages, remember to update the relevant `r
       cd /workspace/ros2 && colcon build && source install/setup.bash
       # Start the GELLO node
       ros2 launch franka_gello_state_publisher main.launch.py config_file:=franka_gello_single.yaml
-      # Start the Franka Hand node
-      ros2 launch franka_gripper_manager franka_gripper_client.launch.py config_file:=example_fr3_config_franka_hand.yaml
       # Hold the GELLO and place it in a comfortable position with some distance from the base pin
       # Start the robot node (the robot position will sync directly to the GELLO position. Avoid moving the GELLO abruptly during synchronization)
       ros2 launch franka_fr3_arm_controllers franka_fr3_arm_controllers.launch.py robot_config_file:=example_fr3_config.yaml
+      # Once the Franka Hand driver is ready, clear the fingers, open the GELLO trigger and start the Hand client
+      ros2 launch franka_gripper_manager franka_gripper_client.launch.py config_file:=example_fr3_config_franka_hand.yaml
     ```
 
 ## Getting Started - Pre-assembled Franka GELLO Duo with the Franka Vision and Manipulation Kit
@@ -237,6 +237,16 @@ Create a configuration file in `src/franka_gripper_manager/config/` or modify on
     ros2 launch franka_gripper_manager franka_gripper_client.launch.py [config_file:=your_config.yaml]
     ```
 
+    With the Franka Hand driver running and the fingers clear, start the client with the GELLO trigger open. The hand homes on startup. Squeezing to 10% opening makes one force-controlled grasp. Opening to 25% releases the object and opens both fingers fully. Between these thresholds the hand keeps its current command.
+
+    To select the grasping force on a single arm, run the client directly:
+
+    ```bash
+    ros2 run franka_gripper_manager franka_gripper_client --ros-args -p grasp_force:=30.0
+    ```
+
+    The force defaults to 30 N and accepts 30–70 N. To change it for the next grasp, run `ros2 param set /gripper_client grasp_force 40.0` in another terminal. The launch file names this node `franka_gripper_client`; use its fully qualified node name when changing the parameter.
+
  - **For the Robotiq 2F-85**:  
    ```bash
    ros2 launch franka_gripper_manager robotiq_gripper_controller_client.launch.py [config_file:=your_config.yaml]
@@ -277,7 +287,7 @@ This package provides a ROS 2 node for managing the gripper connected to the Fra
 
 #### Key Features:
 - Subscribes to `/gripper/gripper_client/target_gripper_width_percent` for gripper width commands.
-- Supports homing and move actions for the gripper.
+- The Franka Hand client homes, grasps with the selected force, and opens fully on release.
 
 #### Launch Files:
 - **`franka_gripper_client.launch.py`**: Launches the gripper manager node for the `Franka Hand`.
